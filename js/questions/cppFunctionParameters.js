@@ -1,3 +1,22 @@
+function RedHerrings() {
+    this.myList = [];
+}
+
+RedHerrings.prototype.cppPushUniqueObjectToArray = function(obj, ans)
+{
+
+    if(this.myList.indexOf(obj) == -1 && (obj !== ans))
+    {
+        this.myList.push(obj);
+    }
+
+};
+
+RedHerrings.prototype.slice = function(a, b)
+{
+    return this.myList.slice(a, b);
+};
+
 function cppFunctionParametersA(randomStream)
 {
     var parameterPassTypes =
@@ -113,8 +132,8 @@ function cppFunctionParametersB(randomStream)
     mainVarName2 = cppGetRandomId(randomStream, 1);
     if(passTypeIndex === 3)
     {
-        mainVarVal1 = [ (randomStream.nextIntRange(10) + 2),
-            (randomStream.nextIntRange(10) + 2), (randomStream.nextIntRange(10) + 2) ];
+        mainVarVal1 = [ (randomStream.nextIntRange(17) + 2),
+            (randomStream.nextIntRange(17) + 2), (randomStream.nextIntRange(17) + 2) ];
         mainVarVal2 = 3;
     }
     else
@@ -133,7 +152,7 @@ function cppFunctionParametersB(randomStream)
 
     if(passTypeIndex === 3)
     {
-        calledFunEvaluatedValue = mainVarVal1;
+        calledFunEvaluatedValue = mainVarVal1.slice(0);
         calledFunEvaluatedValue.map(function(element) {
            return element * calledFunMultiplier + calledFunAdder;
         });
@@ -173,7 +192,7 @@ function cppFunctionParametersB(randomStream)
         (doesCalledFunHave2ndParameter ? ", " + mainVarName2 : "") +
         ");\n\n";
     mainFun += "  std::cout << " + (doesMainStoreReturn ? mainReturnStorageName : mainVarName1);
-    if(passTypeIndex === 3 && !doesCalledFunReturn)
+    if(passTypeIndex === 3 && !doesMainStoreReturn)
     {
         mainFun += "[" + calledFunEvaluatedArrayIndex + "]";
     }
@@ -224,9 +243,9 @@ function cppFunctionParametersB(randomStream)
     // TODO: if called doesn't return or main doesn't store on pass by array, need an index for correct answer
     // TODO: pass by array problems do not get correct answers in list
     // TODO: pass by value w/o returning/saving value from called fun gives correct answer twice (file:///home/jasen/code/AwesomeNextSteps/html/quiz.html?seed=&questionType=cppFunctionParameters&showQuestions=yes&showKey=yes&showJSON=no&jsonString=%7B%22version%22%3A0.1%2C%22title%22%3A%22%22%2C%22quiz%22%3A%5B%7B%22question%22%3A%22cppFunctionParameters%22%2C%22repeat%22%3A%225%22%7D%5D%7D problem 2)
+    // TODO: pass by array uses values from main() instead of output from fun() file:///home/jasen/code/AwesomeNextSteps/html/quiz.html?seed=&questionType=cppFunctionParameters&showQuestions=yes&showKey=yes&showJSON=no&jsonString=%7B%22version%22%3A0.1%2C%22title%22%3A%22%22%2C%22quiz%22%3A%5B%7B%22question%22%3A%22cppFunctionParameters%22%2C%22repeat%22%3A%225%22%7D%5D%7D
     var correctAnswer;
-    var redHerrings = [];
-
+    var redHerrings = new RedHerrings();
     // determine correct answer
     if(doesMainStoreReturn)
     {
@@ -249,7 +268,7 @@ function cppFunctionParametersB(randomStream)
     }
     else if(passTypeIndex === 3)
     {
-        correctAnswer = calledFunEvaluatedValue[calledFunEvaluatedArrayIndex];
+        correctAnswer = calledFunEvaluatedValue[calledFunEvaluatedArrayIndex]; //mainVarVal1[calledFunEvaluatedArrayIndex];
     }
     else
     {
@@ -259,48 +278,50 @@ function cppFunctionParametersB(randomStream)
     correctAnswer = correctAnswer.toString();
 
     // generate red herrings
-    if(correctAnswer != 0)
-        redHerrings.push("0");
+    redHerrings.cppPushUniqueObjectToArray("0", correctAnswer);
     if(correctAnswer !== mainVarVal1)
     {
         if(passTypeIndex === 3)
         {
-            redHerrings.push(mainVarVal1[calledFunEvaluatedArrayIndex].toString());
+            redHerrings.cppPushUniqueObjectToArray(mainVarVal1[calledFunEvaluatedArrayIndex].toString(), correctAnswer);
         }
         else
         {
-            redHerrings.push(mainVarVal1.toString());
+            redHerrings.cppPushUniqueObjectToArray(mainVarVal1.toString(), correctAnswer);
         }
     }
     if(randomStream.nextIntRange(2) == 0)
     {
-        redHerrings.push("an error");
-        redHerrings.push("a memory address");
+        redHerrings.cppPushUniqueObjectToArray("an error", correctAnswer);
+    }
+    if(randomStream.nextIntRange(2) == 0)
+    {
+        redHerrings.cppPushUniqueObjectToArray("a memory address", correctAnswer);
     }
     if(passTypeIndex === 3)
     {
-        for(var x in calledFunEvaluatedValue)
+        for(var aa in calledFunEvaluatedValue)
         {
-            if(x != correctAnswer)
-                redHerrings.push(x.toString());
+            if(aa != correctAnswer)
+                redHerrings.cppPushUniqueObjectToArray(aa.toString(), correctAnswer);
         }
 
-        for(var x in mainVarVal1)
+        for(var j in mainVarVal1)
         {
-            if(x != correctAnswer)
-                redHerrings.push(x.toString());
+            if(j != correctAnswer)
+                redHerrings.cppPushUniqueObjectToArray(j.toString(), correctAnswer);
         }
     }
     else
     {
         if(correctAnswer != calledFunEvaluatedValue)
         {
-            redHerrings.push(calledFunEvaluatedValue.toString());
+            redHerrings.cppPushUniqueObjectToArray(calledFunEvaluatedValue.toString(), correctAnswer);
         }
 
     }
     // darn, i have to fill it with weak red herrings
-    while(redHerrings.length < 5) // changed from 3 to 5 to lower the frequency of "an error" and "a memory address"
+    while(redHerrings.myList.length < 7) // changed from 3 to 7 to lower the frequency of "an error" and "a memory address"
     {
         var canInsert = true;
         var newHerring = (randomStream.nextIntRange(97) + 2).toString();
@@ -308,14 +329,14 @@ function cppFunctionParametersB(randomStream)
         if(newHerring == correctAnswer)
             continue;
 
-        for(var y in redHerrings)   // random herring isn't already a herring?
+        for(var y in redHerrings.myList)   // random herring isn't already a herring?
         {
             if(y == newHerring)
                 canInsert = false;
         }
 
         if(canInsert)
-            redHerrings.push(newHerring);
+            redHerrings.cppPushUniqueObjectToArray(newHerring, correctAnswer);
     }
 
     randomStream.shuffle(redHerrings);
