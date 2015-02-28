@@ -19,6 +19,7 @@ function cppGetRandomReturnType(randomStream)
     return CppRandomReturnTypes[randomStream.nextIntRange(4)];
 }
 
+// use this to get random question components, do NOT use to get functional values (I'm looking at you, "true" and "false")
 function cppGenerateRandomValue(randomStream, num)  // 0: integer, 1: double, 2: boolean
 {
     switch(num)

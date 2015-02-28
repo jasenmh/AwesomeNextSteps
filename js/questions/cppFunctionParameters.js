@@ -1,8 +1,3 @@
-// TODO: from file:///home/jasen/code/AwesomeNextSteps/html/quiz.html?seed=&questionType=cppFunctionParameters&showQuestions=yes&showKey=yes&showJSON=no&jsonString=%7B%22version%22%3A0.1%2C%22title%22%3A%22%22%2C%22quiz%22%3A%5B%7B%22question%22%3A%22cppFunctionParameters%22%2C%22repeat%22%3A%225%22%7D%5D%7D
-// question 2: passing pointer problem has correct answer in answer list twice
-// question 4: pass-by-reference correct answer is incorrect, unchanged from initial value
-// question 5: pass array problem does not specify which array element gets printed, correct answer appears twice
-
 function cppFunctionParametersA(randomStream)
 {
     var parameterPassTypes =
@@ -73,6 +68,10 @@ function cppFunctionParametersA(randomStream)
 
 }
 
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+
 function cppFunctionParametersB(randomStream)
 {
     var parameterPassTypes =
@@ -93,14 +92,13 @@ function cppFunctionParametersB(randomStream)
     if(passTypeIndex === 3)
         doesCalledFunHave2ndParameter = true;
     else
-        doesCalledFunHave2ndParameter = cppGenerateRandomValue(randomStream, 2);
-    var doesCalledFunReturn = false; //cppGenerateRandomValue(randomStream, 2);
-    // TODO: main always seems to store the return
+        doesCalledFunHave2ndParameter = [true, false][randomStream.nextIntRange(2)];
+    var doesCalledFunReturn = [true, false][randomStream.nextIntRange(2)];
     var doesMainStoreReturn; // if doesCalledFunReturn == false, this must be false too
     if(!doesCalledFunReturn)
         doesMainStoreReturn = false;
     else
-        doesMainStoreReturn = cppGenerateRandomValue(randomStream, 2);
+        doesMainStoreReturn = [true, false][randomStream.nextIntRange(2)];
     var calledFunMultiplier = randomStream.nextIntRange(10) + 1;
     var calledFunAdder = randomStream.nextIntRange(10) + 1;
     var calledFunEvaluatedValue;
@@ -174,9 +172,12 @@ function cppFunctionParametersB(randomStream)
     mainFun += "fun(" + mainVarName1 +
         (doesCalledFunHave2ndParameter ? ", " + mainVarName2 : "") +
         ");\n\n";
-    mainFun += "  std:: cout << " + (doesMainStoreReturn ? mainReturnStorageName : mainVarName1) +
-        " << std::endl;\n\nreturn 0;\n}\n";
-
+    mainFun += "  std::cout << " + (doesMainStoreReturn ? mainReturnStorageName : mainVarName1);
+    if(passTypeIndex === 3 && !doesCalledFunReturn)
+    {
+        mainFun += "[" + calledFunEvaluatedArrayIndex + "]";
+    }
+    mainFun += " << std::endl;\n\n  return 0;\n}\n";
 
 
 
@@ -205,7 +206,7 @@ function cppFunctionParametersB(randomStream)
         " + " + calledFunAdder + ";\n";
     }
 
-    // TODO: if passTypeIndex is 1 or 2 and called returns, have chance where it returns 1 or 0
+    // TODO: if passTypeIndex is 1 or 2 and called returns, have chance where it returns 1 or 0 or the 2nd parameter
     if(doesCalledFunReturn)
     {
         calledFun += "\n  return ";
@@ -221,6 +222,8 @@ function cppFunctionParametersB(randomStream)
 
 
     // TODO: if called doesn't return or main doesn't store on pass by array, need an index for correct answer
+    // TODO: pass by array problems do not get correct answers in list
+    // TODO: pass by value w/o returning/saving value from called fun gives correct answer twice (file:///home/jasen/code/AwesomeNextSteps/html/quiz.html?seed=&questionType=cppFunctionParameters&showQuestions=yes&showKey=yes&showJSON=no&jsonString=%7B%22version%22%3A0.1%2C%22title%22%3A%22%22%2C%22quiz%22%3A%5B%7B%22question%22%3A%22cppFunctionParameters%22%2C%22repeat%22%3A%225%22%7D%5D%7D problem 2)
     var correctAnswer;
     var redHerrings = [];
 
@@ -269,8 +272,11 @@ function cppFunctionParametersB(randomStream)
             redHerrings.push(mainVarVal1.toString());
         }
     }
-    redHerrings.push("an error");
-    redHerrings.push("a memory address");
+    if(randomStream.nextIntRange(2) == 0)
+    {
+        redHerrings.push("an error");
+        redHerrings.push("a memory address");
+    }
     if(passTypeIndex === 3)
     {
         for(var x in calledFunEvaluatedValue)
@@ -294,7 +300,7 @@ function cppFunctionParametersB(randomStream)
 
     }
     // darn, i have to fill it with weak red herrings
-    while(redHerrings.length < 3)
+    while(redHerrings.length < 5) // changed from 3 to 5 to lower the frequency of "an error" and "a memory address"
     {
         var canInsert = true;
         var newHerring = (randomStream.nextIntRange(97) + 2).toString();
